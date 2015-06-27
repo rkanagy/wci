@@ -15,6 +15,8 @@ import static wci.message.MessageType.PARSER_SUMMARY;
  */
 public class PascalParserTD extends Parser
 {
+	protected static PascalErrorHandler errorHandler = new PascalErrorHandler();
+	
     /**
      * Constructor.
      * @param scanner the scanner to be used with this parser.
@@ -34,14 +36,19 @@ public class PascalParserTD extends Parser
         Token token;
         long startTime = System.currentTimeMillis();
 
-        while (!((token = nextToken()) instanceof EofToken)) {}
+        try {
+            while (!((token = nextToken()) instanceof EofToken)) {}
 
-        // Send the parser summary message.
-        float elapsedTime = (System.currentTimeMillis() - startTime)/1000f;
-        sendMessage(new Message(PARSER_SUMMARY,
-                                new Number[] {token.getLineNumber(),
-                                              getErrorCount(),
-                                              elapsedTime}));
+            // Send the parser summary message.
+            float elapsedTime = (System.currentTimeMillis() - startTime)/1000f;
+            sendMessage(new Message(PARSER_SUMMARY,
+                                    new Number[] {token.getLineNumber(),
+                                                  getErrorCount(),
+                                                  elapsedTime}));
+        }
+        catch(java.io.IOException ex) {
+        	errorHandler.abortTranslation(IO_ERROR, this);
+        }
     }
 
     /**

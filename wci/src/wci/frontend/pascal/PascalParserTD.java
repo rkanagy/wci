@@ -37,7 +37,22 @@ public class PascalParserTD extends Parser
         long startTime = System.currentTimeMillis();
 
         try {
-            while (!((token = nextToken()) instanceof EofToken)) {}
+            while (!((token = nextToken()) instanceof EofToken)) {
+            	TokenType tokenType = token.getType();
+            	
+            	if (tokenType != ERROR) {
+            		//Format each token
+            		sendMessage(new Message(TOKEN,
+            				new Object[] {token.getLineNumber(),
+            						token.getPosition(),
+            						tokenType,
+            						token.getText(),
+            						token.getValue()}));
+            	}
+            	else {
+            		errorHandler.flag(token, (PascalErrorCode) token.getValue(), this);
+            	}
+            }
 
             // Send the parser summary message.
             float elapsedTime = (System.currentTimeMillis() - startTime)/1000f;
@@ -57,6 +72,6 @@ public class PascalParserTD extends Parser
      */
     public int getErrorCount()
     {
-        return 0;
+        return errorHandler.getErrorCount();
     }
 }
